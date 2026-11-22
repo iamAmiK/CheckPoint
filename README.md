@@ -7,7 +7,7 @@ npm install
 npx expo start
 ```
 
-Then scan the QR code with Expo Go (iOS or Android), or press `a` / `i` for an emulator.
+Then scan the QR code with Expo Go (iOS or Android).
 
 ## Tests
 
