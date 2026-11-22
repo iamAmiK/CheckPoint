@@ -1,4 +1,9 @@
-# CheckPoint (beta)
+# CheckPoint (beta app)
+
+Requirements: Node.js 20 or newer (tested with Node 22) and the latest Expo Go app (the project uses Expo SDK 58).
+**The app is for iOS or Android (Expo Go or an emulator). The web version is not set up.**
+First launch shows the setup flow. To see it again: More > Beta tools > Restart setup.
+To explore Insights straight away: More > Beta tools > Load demo data.
 
 ## Instructions
 
@@ -12,7 +17,7 @@ Then scan the QR code with Expo Go (iOS or Android).
 ## Tests
 
 ```bash
-npm test      # logic tests (tsx) then screen tests (jest)
+npm test     
 ```
 
 ## Three priority features implemented
