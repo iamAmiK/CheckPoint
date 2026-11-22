@@ -25,3 +25,5 @@ npm test
 1. **Check in:** finish or skip setup, tap *Record a note* (simulated voice) or *Type instead*, review the suggested ratings, save.
 2. **Insights:** More > *Load demo data*, then open Insights and Sleep and mood.
 3. **Rhythm:** open the Rhythm tab, mark a rest day, change the reminder.
+
+4. Many other pages are implemented too, some with hardcoded or just display text, but I tried to make as many interactive features in all pages as possible. For example, checking the different setting functionalities in More.
