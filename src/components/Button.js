@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, MIN_TARGET } from '../theme';
 
 // One button component, three looks. Always at least 48 high (>= 44 pt target).
-export default function Button({ title, onPress, variant = 'primary', icon, disabled, hint, style, danger }) {
+export default function Button({ title, onPress, variant = 'primary', icon, iconRight, disabled, hint, style, danger }) {
   const isPrimary = variant === 'primary';
   const isGhost = variant === 'ghost';
   const fg = isPrimary ? '#FFFFFF' : danger ? colors.danger : colors.primaryDark;
@@ -27,8 +27,9 @@ export default function Button({ title, onPress, variant = 'primary', icon, disa
       ]}
     >
       <View style={styles.inner}>
-        {icon ? <Ionicons name={icon} size={20} color={fg} style={{ marginRight: 8 }} /> : null}
+        {icon && !iconRight ? <Ionicons name={icon} size={20} color={fg} style={{ marginRight: 8 }} /> : null}
         <Text style={[styles.text, { color: fg }]}>{title}</Text>
+        {icon && iconRight ? <Ionicons name={icon} size={20} color={fg} style={{ marginLeft: 8 }} /> : null}
       </View>
     </Pressable>
   );

@@ -1,20 +1,23 @@
-// Design tokens. Colours were checked against WCAG 2.2 contrast:
-// text on card >= 4.5:1, borders/icons/chart marks >= 3:1.
+// Design tokens. The palette comes from the CheckPoint welcome design: a confident blue,
+// deep navy text, soft blue tints, and small purple and green accents.
+// Contrast was checked against WCAG 2.2: text >= 4.5:1, borders/icons/chart marks >= 3:1.
 export const colors = {
-  primary: '#0F766E', // calm teal (white text on it = 5.5:1)
-  primaryDark: '#115E59',
-  primarySoft: '#E0F2F1',
-  bg: '#F5F8F8',
+  primary: '#2563EB', // brand blue (white text on it = 5.2:1)
+  primaryDark: '#1D4ED8', // blue for text and icons on white or tint (6.7:1 on white)
+  primarySoft: '#E8F0FE', // soft blue tint for cards, chips and selected states
+  bg: '#F8FAFC', // page background
   card: '#FFFFFF',
-  text: '#1F2933',
-  muted: '#52606D', // darkened from the Hi-Fi grey (3.8:1) to 6.4:1 on bg
-  border: '#7B8794', // 3.9:1 on white, used for inputs and outlines
-  divider: '#E4E9EC',
-  accent: '#92400E', // soft amber text (7:1 on accentSoft)
-  accentSoft: '#FEF3C7',
-  support: '#E8EEF4', // quiet, non-alarming surface for Support
-  supportText: '#1E3A5F',
-  danger: '#9B1C1C', // only used for the delete confirmation, never for missed days
+  text: '#14213D', // deep navy (15:1 on bg)
+  muted: '#5B6B82', // slate for captions (5.2:1 on bg)
+  border: '#7A889E', // inputs and outlines (3.6:1 on white, 3.4:1 on bg)
+  divider: '#E2E8F0',
+  accent: '#5B3FA0', // purple accent text (6.8:1 on accentSoft), used for tips
+  accentSoft: '#F1ECFA',
+  green: '#1F7A66', // small positive accent (Private / Reset in the welcome design)
+  greenSoft: '#E7F5F1',
+  support: '#E8F0FE', // quiet, non-alarming surface for Support
+  supportText: '#1E3A8A',
+  danger: '#B42318', // only used for the delete confirmation, never for missed days
 };
 
 // 8 pt spacing grid

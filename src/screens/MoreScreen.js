@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from 'react-native';
-import { Screen, Card, ListRow, Caption } from '../components/Layout';
+import { Screen, Card, ListRow } from '../components/Layout';
 import { useApp } from '../store/AppContext';
 import { exportData } from '../utils/exportData';
 import { colors, type } from '../theme';
@@ -39,7 +39,6 @@ export default function MoreScreen({ navigation }) {
         <ListRow icon="albums-outline" title="Load demo data" subtitle="Adds 30 days of sample Check ins to explore Insights" onPress={() => dispatch({ type: 'LOAD_DEMO' })} />
         <ListRow icon="refresh-outline" title="Restart setup" subtitle="Shows the welcome screens again" onPress={() => dispatch({ type: 'SET_SETTINGS', payload: { onboarded: false } })} last />
       </Group>
-      <Caption style={{ textAlign: 'center' }}>CheckPoint beta 1.0</Caption>
     </Screen>
   );
 }

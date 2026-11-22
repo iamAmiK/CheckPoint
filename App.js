@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { AppProvider, useApp } from './src/store/AppContext';
 import NeedHelpLink from './src/components/NeedHelpLink';
+import { Wordmark } from './src/components/Logo';
 import { colors } from './src/theme';
 
 import SetupScreen from './src/screens/SetupScreen';
@@ -69,6 +70,8 @@ function Tabs() {
           component={t.component}
           options={{
             title: t.title,
+            // Home shows the CheckPoint wordmark in the header (brand moment on the first tab)
+            ...(t.name === 'Home' ? { headerTitle: () => <Wordmark size={22} />, headerTitleAlign: 'left' } : {}),
             tabBarAccessibilityLabel: `${t.title} tab`,
             tabBarIcon: ({ color, size }) => <Ionicons name={t.icon} size={t.name === 'CheckIn' ? size + 6 : size} color={color} />,
           }}

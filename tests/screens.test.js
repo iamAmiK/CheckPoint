@@ -13,7 +13,7 @@ beforeEach(async () => {
 
 test('insights: empty state, then demo data shows headline, basis and Not right', async () => {
   await render(<App />);
-  await press('Skip');
+  await press('Skip setup for now');
   await tab('Insights');
   expect(await screen.findByText('7 more days needed')).toBeTruthy();
   await press('Load demo data to preview');
@@ -29,7 +29,7 @@ test('insights: empty state, then demo data shows headline, basis and Not right'
 
 test('sleep insights wording is a pattern, not a cause', async () => {
   await render(<App />);
-  await press('Skip');
+  await press('Skip setup for now');
   await tab('Insights');
   await press('Load demo data to preview');
   await fireEvent.press(await screen.findByLabelText(/Sleep and mood/));
@@ -41,7 +41,7 @@ test('sleep insights wording is a pattern, not a cause', async () => {
 
 test('rhythm: rest day counts, no streak wording', async () => {
   await render(<App />);
-  await press('Skip');
+  await press('Skip setup for now');
   await tab('Rhythm');
   expect(await screen.findByText('0 of 7 days')).toBeTruthy();
   await press('Mark today as a rest day');
@@ -52,7 +52,7 @@ test('rhythm: rest day counts, no streak wording', async () => {
 
 test('voice flow: record, stop, transcribe, review', async () => {
   await render(<App />);
-  await press('Skip');
+  await press('Skip setup for now');
   await tab('Home');
   await press('Record a note');
   expect(await screen.findByText('Recording')).toBeTruthy();
@@ -62,7 +62,7 @@ test('voice flow: record, stop, transcribe, review', async () => {
 
 test('small action: dismiss is silent and offers the next one', async () => {
   await render(<App />);
-  await press('Skip');
+  await press('Skip setup for now');
   await tab('Home');
   await press('Not today');
   expect(screen.queryByText(/missed|failed|sorry/i)).toBeNull();
@@ -73,7 +73,7 @@ test('small action: dismiss is silent and offers the next one', async () => {
 
 test('data controls: Delete data is 2 taps from More and needs confirmation', async () => {
   await render(<App />);
-  await press('Skip');
+  await press('Skip setup for now');
   await tab('More');
   expect(await screen.findByText('Your data')).toBeTruthy();
   await fireEvent.press(await screen.findByLabelText(/Delete my data/));
@@ -84,11 +84,19 @@ test('data controls: Delete data is 2 taps from More and needs confirmation', as
 
 test('health: add by hand saves, skip shows nothing', async () => {
   await render(<App />);
-  await press('Skip');
+  await press('Skip setup for now');
   await tab('More');
   await fireEvent.press(await screen.findByLabelText(/Health connections/));
   await press('Save');
   expect(await screen.findByText('Saved to your record.')).toBeTruthy();
   await press('Skip for now');
   expect(await screen.findByText('Your data')).toBeTruthy();
+});
+
+test('More has no version text', async () => {
+  await render(<App />);
+  await press('Skip setup for now');
+  await fireEvent.press(await screen.findByLabelText('More tab'));
+  expect(await screen.findByText('Your data')).toBeTruthy();
+  expect(screen.queryByText(/beta 1/i)).toBeNull();
 });
