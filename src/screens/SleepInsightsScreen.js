@@ -4,10 +4,12 @@ import { Screen, Card, Body, Caption } from '../components/Layout';
 import Button from '../components/Button';
 import Tip from '../components/Tip';
 import { SleepMoodChart } from '../components/Charts';
-import { RangeToggle } from './InsightsScreen';
+import { RangeToggle, PatternBadge } from './InsightsScreen';
 import { useApp } from '../store/AppContext';
 import { METRICS } from '../data/metrics';
-import { sleepComparison, sleepHeadline, basisLine, dailySeries } from '../services/insights';
+import {
+  sleepComparison, sleepHeadline, basisLine, dailySeries, patternDetected, patternStrength, notEnoughLine,
+} from '../services/insights';
 import { lastNDays } from '../utils/dates';
 import { colors, radius, type, MIN_TARGET } from '../theme';
 
@@ -23,12 +25,13 @@ export default function SleepInsightsScreen({ navigation }) {
   const cmp = sleepComparison(state.checkIns, state.sleep, metric, days);
   const headline = sleepHeadline(cmp, metric);
   const basis = basisLine(state.checkIns, state.sleep, days);
+  const detected = patternDetected(cmp);
 
   // Mood per day for the overlay dots
   const moodByDay = {};
   dailySeries(state.checkIns, 'mood', days).forEach((s) => { if (s.value != null) moodByDay[s.day] = s.value; });
   const summary = cmp.enough
-    ? `${headline} Average ${metric} was ${cmp.shortAvg} on short nights and ${cmp.restAvg} on other nights.`
+    ? `${detected ? 'Pattern detected. ' : ''}${headline} Average ${metric} was ${cmp.shortAvg} on short nights and ${cmp.restAvg} on other nights.`
     : 'Not enough data to compare yet.';
 
   return (
@@ -53,7 +56,8 @@ export default function SleepInsightsScreen({ navigation }) {
       <Card>
         {cmp.enough ? (
           <>
-            <Text style={type.h2} accessibilityRole="header">{headline}</Text>
+            {detected && <PatternBadge strength={patternStrength(cmp)} />}
+            <Text style={[type.h2, { marginTop: detected ? 6 : 0 }]} accessibilityRole="header">{headline}</Text>
             <Body style={{ marginTop: 6 }}>
               Average {METRICS[metric].label.toLowerCase()}: {cmp.shortAvg} on short nights, {cmp.restAvg} on other nights (out of 5).
             </Body>
@@ -64,8 +68,8 @@ export default function SleepInsightsScreen({ navigation }) {
           <>
             <Text style={type.h2} accessibilityRole="header">Not enough data yet</Text>
             <Body style={{ marginVertical: 6 }}>
-              To compare, we need at least 3 short nights (under 6 hours) and 3 longer nights that also have a Check in.
-              You have {cmp.shortDays} short and {cmp.restDays} longer so far.
+              To compare, we need at least {cmp.need} short nights (under 6 hours) and {cmp.need} longer nights that also have a Check in.{' '}
+              {notEnoughLine(cmp)}
             </Body>
             <Button title="Add sleep" variant="secondary" onPress={() => navigation.navigate('HealthConnections')} />
           </>
@@ -87,6 +91,8 @@ export default function SleepInsightsScreen({ navigation }) {
           <Caption>
             We split the days in this period into nights with under 6 hours of sleep and nights with 6 hours or more.
             For each group we average the ratings from your Check ins. Days with no sleep or no Check in are left out.
+            A pattern is shown when the two averages differ by 0.3 or more (out of 5). In a 30 day view we need at
+            least 3 nights in each group; in a 7 day view, 2.
           </Caption>
         )}
       </Card>

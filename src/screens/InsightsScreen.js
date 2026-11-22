@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Screen, Card, Body, Caption, ListRow } from '../components/Layout';
 import Button from '../components/Button';
 import Tip from '../components/Tip';
@@ -8,6 +9,7 @@ import { useApp } from '../store/AppContext';
 import { METRICS } from '../data/metrics';
 import {
   MIN_DAYS, dailySeries, activitySeries, daysWithCheckIns, basisLine, stressHeadline, seriesSummary,
+  sleepComparison, patternDetected, patternStrength, notEnoughLine,
 } from '../services/insights';
 import { lastNDays } from '../utils/dates';
 import { colors, radius, type, MIN_TARGET } from '../theme';
@@ -29,6 +31,20 @@ export function RangeToggle({ range, onChange }) {
           <Text style={[styles.toggleText, range === n && { color: '#FFFFFF' }]}>{n} days</Text>
         </Pressable>
       ))}
+    </View>
+  );
+}
+
+// Small label so a detected pattern is obvious at a glance (icon + words, not colour alone).
+export function PatternBadge({ strength }) {
+  return (
+    <View
+      style={styles.badge}
+      accessible
+      accessibilityLabel={`Pattern detected${strength ? `, ${strength}` : ''}`}
+    >
+      <Ionicons name="checkmark-circle" size={18} color={colors.primaryDark} />
+      <Text style={styles.badgeText}>Pattern detected{strength ? ` (${strength})` : ''}</Text>
     </View>
   );
 }
@@ -68,6 +84,8 @@ export default function InsightsScreen({ navigation }) {
   const summary = seriesSummary(series, label, trend === 'activity' ? ' minutes' : ' out of 5');
   const headline = stressHeadline(state.checkIns, state.sleep, days);
   const basis = basisLine(state.checkIns, state.sleep, days);
+  const cmp = sleepComparison(state.checkIns, state.sleep, 'stress', days);
+  const detected = patternDetected(cmp);
 
   return (
     <Screen>
@@ -83,9 +101,25 @@ export default function InsightsScreen({ navigation }) {
       ) : (
         <Card>
           <Text style={type.caption}>What may affect your stress</Text>
+          {detected && <PatternBadge strength={patternStrength(cmp)} />}
           <Text style={[type.h2, { marginVertical: 6 }]} accessibilityRole="header">{headline}</Text>
-          <Body style={{ fontWeight: '600', color: colors.primaryDark }}>{basis}</Body>
+          {cmp.enough ? (
+            <Body>
+              Average stress: {cmp.shortAvg} on short nights, {cmp.restAvg} on other nights (out of 5).
+            </Body>
+          ) : (
+            <Body>{notEnoughLine(cmp)}</Body>
+          )}
+          <Body style={{ fontWeight: '600', color: colors.primaryDark, marginTop: 6 }}>{basis}</Body>
           <Caption style={{ marginTop: 4 }}>This shows a pattern, not a cause.</Caption>
+          {detected && (
+            <Button
+              title="See sleep and mood"
+              variant="ghost"
+              onPress={() => navigation.navigate('SleepInsights')}
+              hint="Opens the sleep and mood comparison"
+            />
+          )}
           <Button
             title="Not right"
             variant="secondary"
@@ -138,4 +172,10 @@ const styles = StyleSheet.create({
   },
   chipOn: { backgroundColor: colors.primary, borderColor: colors.primaryDark },
   chipText: { fontSize: 15, fontWeight: '500', color: colors.text },
+  badge: {
+    flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6,
+    backgroundColor: colors.primarySoft, borderRadius: radius.pill,
+    paddingVertical: 4, paddingHorizontal: 10, marginTop: 6,
+  },
+  badgeText: { fontSize: 14, fontWeight: '700', color: colors.primaryDark },
 });

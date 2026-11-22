@@ -4,9 +4,14 @@ import { lastNDays } from '../utils/dates';
 
 export const MIN_DAYS = 7; // days with a Check in before insights appear
 const SHORT_SLEEP = 6; // hours; "nights under 6 hours"
+const SIMILAR = 0.3; // differences smaller than this count as "similar"
 
 const avg = (nums) => (nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null);
 const round1 = (n) => Math.round(n * 10) / 10;
+
+// Nights needed on EACH side (short / longer) before we compare.
+// A 7 day view has fewer nights to work with, so it asks for 2 instead of 3.
+export const minPerSide = (days) => (days.length >= 14 ? 3 : 2);
 
 // Average of a metric per day (a day can have several Check ins).
 export function dailySeries(checkIns, metric, days) {
@@ -34,7 +39,7 @@ export function basisLine(checkIns, sleep, days) {
 }
 
 // Compare a metric on short-sleep nights against other nights.
-// Needs at least 3 days on each side, otherwise returns how many more are needed.
+// Needs minPerSide(days) days on each side, otherwise returns how many we have and how many are needed.
 export function sleepComparison(checkIns, sleep, metric, days) {
   const short = [];
   const rest = [];
@@ -44,12 +49,38 @@ export function sleepComparison(checkIns, sleep, metric, days) {
     if (!vals.length) return;
     (sleep[d] < SHORT_SLEEP ? short : rest).push(avg(vals));
   });
-  if (short.length < 3 || rest.length < 3) {
-    return { enough: false, shortDays: short.length, restDays: rest.length };
+  const need = minPerSide(days);
+  if (short.length < need || rest.length < need) {
+    return { enough: false, shortDays: short.length, restDays: rest.length, need };
   }
   const a = avg(short);
   const b = avg(rest);
-  return { enough: true, shortAvg: round1(a), restAvg: round1(b), diff: round1(a - b) };
+  return {
+    enough: true,
+    shortAvg: round1(a),
+    restAvg: round1(b),
+    diff: round1(a - b),
+    shortDays: short.length,
+    restDays: rest.length,
+    need,
+  };
+}
+
+// True only when there was enough data AND the two groups clearly differ.
+export const patternDetected = (cmp) => !!cmp && cmp.enough && Math.abs(cmp.diff) >= SIMILAR;
+
+// "slight", "clear" or "strong", so the wording matches the size of the difference.
+export function patternStrength(cmp) {
+  if (!patternDetected(cmp)) return null;
+  const d = Math.abs(cmp.diff);
+  if (d >= 1) return 'strong';
+  if (d >= 0.6) return 'clear';
+  return 'slight';
+}
+
+// Plain-language explanation when there is not enough data yet.
+export function notEnoughLine(cmp) {
+  return `You have ${cmp.shortDays} short night${cmp.shortDays === 1 ? '' : 's'} and ${cmp.restDays} longer night${cmp.restDays === 1 ? '' : 's'} with a Check in. We need at least ${cmp.need} of each.`;
 }
 
 // Headline for the stress insight (HF5): plain language, pattern only.
@@ -58,7 +89,7 @@ export function stressHeadline(checkIns, sleep, days) {
   if (!cmp.enough) {
     return 'Not enough sleep and stress data in this period to spot a pattern yet.';
   }
-  if (Math.abs(cmp.diff) < 0.3) {
+  if (!patternDetected(cmp)) {
     return 'Your stress looked similar on short and longer nights.';
   }
   return cmp.diff > 0
@@ -71,7 +102,7 @@ export function stressHeadline(checkIns, sleep, days) {
 export function sleepHeadline(cmp, metric) {
   if (!cmp.enough) return null;
   const noun = metric; // "mood", "stress" or "energy"
-  if (Math.abs(cmp.diff) < 0.3) return `Your ${noun} looked similar on short and longer nights.`;
+  if (!patternDetected(cmp)) return `Your ${noun} looked similar on short and longer nights.`;
   return `On nights under ${SHORT_SLEEP} hours, your ${noun} was ${cmp.diff < 0 ? 'lower' : 'higher'}.`;
 }
 

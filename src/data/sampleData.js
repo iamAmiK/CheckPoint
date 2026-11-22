@@ -18,9 +18,14 @@ export function makeSampleData(today = toKey()) {
   const activity = {};
 
   days.forEach((day, i) => {
-    sleep[day] = Math.round((5 + rand() * 3.5) * 2) / 2; // 5 to 8.5 hours
+    // Short nights fall on a fixed schedule (every third day) instead of by chance, so every
+    // 7 and 30 day window has enough short AND longer nights for a pattern to be detected.
+    const shortNight = i % 3 === 1;
+    sleep[day] = shortNight
+      ? (rand() < 0.5 ? 5 : 5.5) // under 6 hours
+      : Math.round((6.5 + rand() * 2) * 2) / 2; // 6.5 to 8.5 hours
     activity[day] = Math.round((10 + rand() * 50) / 5) * 5;
-    if (i % 5 === 4) return; // a few rest days with no Check in
+    if (i % 6 === 5) return; // a few rest days with no Check in (never more than one per week)
     const lowSleep = sleep[day] < 6;
     // Built-in pattern for the demo: short nights go with lower mood and higher stress
     const mood = Math.max(1, Math.min(5, Math.round((lowSleep ? 2.6 : 3.9) + (rand() - 0.5) * 1.4)));
